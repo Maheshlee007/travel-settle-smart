@@ -48,7 +48,8 @@ export const MealsTab = ({ importedExpenses = [] }: MealsTabProps) => {
       setRows(prevRows => {
         const existingIds = prevRows.map(row => row.id);
         const newImported = importedRows.filter(row => !existingIds.includes(row.id));
-        return [...prevRows.filter(row => row.date || row.description), ...newImported];
+        const existingFilledRows = prevRows.filter(row => row.date || row.description || row.amount > 0);
+        return [...existingFilledRows, ...newImported];
       });
     }
   }, [importedExpenses]);

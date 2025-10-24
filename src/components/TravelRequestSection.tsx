@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +16,11 @@ interface TravelRequestData {
   toPlace: string;
 }
 
-export const TravelRequestSection = () => {
+interface TravelRequestSectionProps {
+  onTravelRequestChange: (requestNumber: string) => void;
+}
+
+export const TravelRequestSection = ({ onTravelRequestChange }: TravelRequestSectionProps) => {
   const [selectedRequest, setSelectedRequest] = useState("");
   const [travelData, setTravelData] = useState<TravelRequestData | null>(null);
 
@@ -42,6 +47,8 @@ export const TravelRequestSection = () => {
       toPlace: "Mumbai",
     });
 
+    // Notify parent component about the selected travel request
+    onTravelRequestChange(selectedRequest);
     toast.success("Travel request details fetched successfully");
   };
 
@@ -73,36 +80,45 @@ export const TravelRequestSection = () => {
         </div>
 
         {travelData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Travel Type</label>
-              <p className="text-foreground mt-1">{travelData.travelType}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Purpose</label>
-              <p className="text-foreground mt-1">{travelData.purpose}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Requested Date</label>
-              <p className="text-foreground mt-1">{travelData.requestedDate}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">From Date</label>
-              <p className="text-foreground mt-1">{travelData.fromDate}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">To Date</label>
-              <p className="text-foreground mt-1">{travelData.toDate}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">From Place</label>
-              <p className="text-foreground mt-1">{travelData.fromPlace}</p>
-            </div>
-            <div className="md:col-span-2 lg:col-span-3">
-              <label className="text-sm font-medium text-muted-foreground">To Place</label>
-              <p className="text-foreground mt-1">{travelData.toPlace}</p>
-            </div>
-          </div>
+          <Accordion type="single" collapsible className="w-full" defaultValue="travel-details">
+            <AccordionItem value="travel-details">
+              <AccordionTrigger className="text-base font-medium">
+                Travel Request Details
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Travel Type</label>
+                    <p className="text-foreground mt-1">{travelData.travelType}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Purpose</label>
+                    <p className="text-foreground mt-1">{travelData.purpose}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Requested Date</label>
+                    <p className="text-foreground mt-1">{travelData.requestedDate}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">From Date</label>
+                    <p className="text-foreground mt-1">{travelData.fromDate}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">To Date</label>
+                    <p className="text-foreground mt-1">{travelData.toDate}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">From Place</label>
+                    <p className="text-foreground mt-1">{travelData.fromPlace}</p>
+                  </div>
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <label className="text-sm font-medium text-muted-foreground">To Place</label>
+                    <p className="text-foreground mt-1">{travelData.toPlace}</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
       </div>
     </Card>

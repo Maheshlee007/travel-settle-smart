@@ -20,11 +20,13 @@ interface Settlement {
   financeReviewer: string;
   reviewDate: string;
   expenses: ExpenseItem[];
+  isDraft?: boolean;
 }
 
 interface TravelSettlementState {
   expenses: ExpenseItem[];
   settlements: Settlement[];
+  draftSettlements: Settlement[];
 }
 
 // 2. Define the actions that can be performed on the state
@@ -32,6 +34,8 @@ type Action =
   | { type: 'ADD_EXPENSE'; payload: ExpenseItem }
   | { type: 'DELETE_EXPENSE'; payload: string }
   | { type: 'ADD_SETTLEMENT'; payload: Settlement }
+  | { type: 'ADD_DRAFT_SETTLEMENT'; payload: Settlement }
+  | { type: 'MOVE_DRAFT_TO_SETTLEMENT'; payload: string }
   | { type: 'SET_EXPENSES'; payload: ExpenseItem[] };
 
 // 3. Define the initial state with some dummy data
@@ -77,6 +81,38 @@ const initialState: TravelSettlementState = {
       expenses: []
     }
   ],
+  draftSettlements: [
+    {
+      requestNumber: 'TR-2025-003',
+      status: 'Draft',
+      totalClaimed: 2200,
+      totalApproved: 0,
+      totalPaid: 0,
+      financeReviewer: 'Not Assigned',
+      reviewDate: new Date().toISOString().split("T")[0],
+      expenses: [
+        {
+          id: '4',
+          type: 'travel',
+          amount: 1500,
+          date: '2025-01-23',
+          remarks: 'Train ticket to Chennai',
+          image: null,
+          travelRequestNumber: 'TR-2025-003'
+        },
+        {
+          id: '5',
+          type: 'travel',
+          amount: 700,
+          date: '2025-01-23',
+          remarks: 'Bus fare local transport',
+          image: null,
+          travelRequestNumber: 'TR-2025-003'
+        }
+      ],
+      isDraft: true
+    }
+  ]
 };
 
 // 4. Create the reducer function to handle state changes
@@ -97,6 +133,21 @@ const travelSettlementReducer = (state: TravelSettlementState, action: Action): 
         ...state,
         settlements: [...state.settlements, action.payload],
       };
+    case 'ADD_DRAFT_SETTLEMENT':
+      return {
+        ...state,
+        draftSettlements: [...state.draftSettlements, { ...action.payload, isDraft: true }],
+      };
+    case 'MOVE_DRAFT_TO_SETTLEMENT':
+      const draftToMove = state.draftSettlements.find(draft => draft.requestNumber === action.payload);
+      if (draftToMove) {
+        return {
+          ...state,
+          draftSettlements: state.draftSettlements.filter(draft => draft.requestNumber !== action.payload),
+          settlements: [...state.settlements, { ...draftToMove, isDraft: false, status: 'Under Review' }],
+        };
+      }
+      return state;
     case 'SET_EXPENSES':
       return {
         ...state,

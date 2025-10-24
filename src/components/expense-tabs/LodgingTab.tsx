@@ -50,7 +50,8 @@ export const LodgingTab = ({ importedExpenses = [] }: LodgingTabProps) => {
       setRows(prevRows => {
         const existingIds = prevRows.map(row => row.id);
         const newImported = importedRows.filter(row => !existingIds.includes(row.id));
-        return [...prevRows.filter(row => row.date || row.hotelName || row.city), ...newImported];
+        const existingFilledRows = prevRows.filter(row => row.date || row.hotelName || row.city || row.amount > 0);
+        return [...existingFilledRows, ...newImported];
       });
     }
   }, [importedExpenses]);

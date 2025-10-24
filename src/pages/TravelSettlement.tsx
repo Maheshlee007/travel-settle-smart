@@ -35,7 +35,7 @@ const TravelSettlement = () => {
   const { state, dispatch } = useTravelSettlement();
   const [activeTab, setActiveTab] = useState("flat-allowance");
   const [showLoadDialog, setShowLoadDialog] = useState(false);
-  const [currentTravelRequest, setCurrentTravelRequest] = useState("TR-2025-001");
+  const [currentTravelRequest, setCurrentTravelRequest] = useState("");
   const [selectedExpenses, setSelectedExpenses] = useState<ExpenseItem[]>([]);
 
   // Mock employee data
@@ -49,10 +49,32 @@ const TravelSettlement = () => {
   };
 
   const handleSave = () => {
+    if (!currentTravelRequest.trim()) {
+      toast.error("Please enter Travel Request Number before saving");
+      return;
+    }
+    
+    const draftSettlement = {
+      requestNumber: currentTravelRequest,
+      status: "Draft",
+      totalClaimed: selectedExpenses.reduce((acc, exp) => acc + exp.amount, 0),
+      totalApproved: 0,
+      totalPaid: 0,
+      financeReviewer: "Not Assigned",
+      reviewDate: new Date().toISOString().split("T")[0],
+      expenses: selectedExpenses,
+      isDraft: true,
+    };
+    dispatch({ type: "ADD_DRAFT_SETTLEMENT", payload: draftSettlement });
     toast.success("Draft saved successfully");
   };
 
   const handleSubmit = () => {
+    if (!currentTravelRequest.trim()) {
+      toast.error("Please enter Travel Request Number before submitting");
+      return;
+    }
+    
     if (selectedExpenses.length === 0) {
       toast.error("Please add some expenses before submitting");
       return;
@@ -95,9 +117,22 @@ const TravelSettlement = () => {
     setSelectedExpenses([...selectedExpenses, ...newExpenses]);
     toast.success(`Loaded ${newExpenses.length} expense${newExpenses.length > 1 ? 's' : ''} into respective tabs`);
     
-    // Stay on current tab or switch to flat-allowance
-    if (activeTab === "expenses") {
-      setActiveTab("flat-allowance");
+    // Auto-select tab based on the first imported expense type
+    if (newExpenses.length > 0) {
+      const firstExpenseType = newExpenses[0].type.toLowerCase();
+      if (firstExpenseType.includes('allowance')) {
+        setActiveTab("flat-allowance");
+      } else if (firstExpenseType.includes('travel')) {
+        setActiveTab("travel");
+      } else if (firstExpenseType.includes('lodging') || firstExpenseType.includes('hotel')) {
+        setActiveTab("lodging");
+      } else if (firstExpenseType.includes('conveyance') || firstExpenseType.includes('transport')) {
+        setActiveTab("conveyance");
+      } else if (firstExpenseType.includes('meal') || firstExpenseType.includes('food')) {
+        setActiveTab("meals");
+      } else {
+        setActiveTab("others");
+      }
     }
   };
 
@@ -132,7 +167,7 @@ const TravelSettlement = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <EmployeeDetails {...employeeData} />
-            <TravelRequestSection />
+            <TravelRequestSection onTravelRequestChange={setCurrentTravelRequest} />
 
             <Card className="p-6">
               <div className="mb-6 space-y-4">
@@ -144,22 +179,11 @@ const TravelSettlement = () => {
                   </Button>
                 </div>
                 
-                <div className="flex items-center gap-4">
-                  {/* <div className="flex-1">
-                    <Label htmlFor="travel-request">Travel Request Number</Label>
-                    <Input
-                      id="travel-request"
-                      value={currentTravelRequest}
-                      onChange={(e) => setCurrentTravelRequest(e.target.value)}
-                      placeholder="e.g., TR-2025-001"
-                    />
-                  </div> */}
-                  {selectedExpenses.length > 0 && (
-                    <div className="text-sm text-muted-foreground">
-                      {selectedExpenses.length} expense{selectedExpenses.length > 1 ? 's' : ''} selected
-                    </div>
-                  )}
-                </div>
+                {selectedExpenses.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    {selectedExpenses.length} expense{selectedExpenses.length > 1 ? 's' : ''} selected
+                  </div>
+                )}
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -228,11 +252,19 @@ const TravelSettlement = () => {
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>
-            <Button variant="secondary" onClick={handleSave}>
+            <Button 
+              variant="secondary" 
+              onClick={handleSave}
+              disabled={!currentTravelRequest.trim()}
+            >
               <Save className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
-            <Button onClick={handleSubmit} className="bg-primary hover:bg-primary/90">
+            <Button 
+              onClick={handleSubmit} 
+              className="bg-primary hover:bg-primary/90"
+              disabled={!currentTravelRequest.trim()}
+            >
               <Send className="h-4 w-4 mr-2" />
               Submit Settlement
             </Button>

@@ -53,7 +53,8 @@ export const TravelTab = ({ importedExpenses = [] }: TravelTabProps) => {
       setRows(prevRows => {
         const existingIds = prevRows.map(row => row.id);
         const newImported = importedRows.filter(row => !existingIds.includes(row.id));
-        return [...prevRows.filter(row => row.date || row.from || row.to), ...newImported];
+        const existingFilledRows = prevRows.filter(row => row.date || row.from || row.to || row.amount > 0);
+        return [...existingFilledRows, ...newImported];
       });
     }
   }, [importedExpenses]);
