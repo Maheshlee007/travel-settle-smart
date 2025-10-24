@@ -42,8 +42,22 @@ const TravelSettlement = () => {
   };
 
   const handleLoadExpenses = () => {
-    toast.info("Loading saved expenses...");
-    // Mock loading expenses from expense capture
+    const savedExpensesStr = localStorage.getItem("savedExpenses");
+    if (!savedExpensesStr) {
+      toast.error("No saved expenses found");
+      return;
+    }
+    
+    const savedExpenses = JSON.parse(savedExpensesStr);
+    if (savedExpenses.length === 0) {
+      toast.error("No saved expenses found");
+      return;
+    }
+    
+    toast.success(`Loaded ${savedExpenses.length} expense${savedExpenses.length > 1 ? 's' : ''} successfully`);
+    
+    // Clear the saved expenses after loading
+    localStorage.removeItem("savedExpenses");
   };
 
   return (

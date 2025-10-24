@@ -55,7 +55,9 @@ const ExpenseCapture = () => {
       image: currentExpense.image,
     };
 
-    setExpenses([...expenses, newExpense]);
+    const updatedExpenses = [...expenses, newExpense];
+    setExpenses(updatedExpenses);
+    localStorage.setItem("savedExpenses", JSON.stringify(updatedExpenses));
     setCurrentExpense({ type: "", amount: 0, date: "", remarks: "", image: null });
     toast.success("Expense saved locally");
   };
@@ -70,7 +72,9 @@ const ExpenseCapture = () => {
   };
 
   const handleDelete = (id: string) => {
-    setExpenses(expenses.filter(exp => exp.id !== id));
+    const updatedExpenses = expenses.filter(exp => exp.id !== id);
+    setExpenses(updatedExpenses);
+    localStorage.setItem("savedExpenses", JSON.stringify(updatedExpenses));
     toast.success("Expense deleted");
   };
 
