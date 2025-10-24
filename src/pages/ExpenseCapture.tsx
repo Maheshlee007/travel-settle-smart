@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Upload, Save, RefreshCw, X, ArrowLeft } from "lucide-react";
+import { Camera, Upload, Save, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useTravelSettlement } from "@/context/TravelSettlementContext";
 
 interface ExpenseItem {
   id: string;
@@ -16,17 +17,19 @@ interface ExpenseItem {
   date: string;
   remarks: string;
   image: string | null;
+  travelRequestNumber: string;
 }
 
 const ExpenseCapture = () => {
   const navigate = useNavigate();
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const { state: { expenses }, dispatch } = useTravelSettlement();
   const [currentExpense, setCurrentExpense] = useState<Partial<ExpenseItem>>({
     type: "",
     amount: 0,
     date: "",
     remarks: "",
     image: null,
+    travelRequestNumber: "",
   });
 
   const handleCapture = () => {
@@ -53,32 +56,18 @@ const ExpenseCapture = () => {
       date: currentExpense.date || new Date().toISOString().split("T")[0],
       remarks: currentExpense.remarks || "",
       image: currentExpense.image,
+      travelRequestNumber: currentExpense.travelRequestNumber || "TR-2025-001", // Default value
     };
 
-    const updatedExpenses = [...expenses, newExpense];
-    setExpenses(updatedExpenses);
-    localStorage.setItem("savedExpenses", JSON.stringify(updatedExpenses));
-    setCurrentExpense({ type: "", amount: 0, date: "", remarks: "", image: null });
-    toast.success("Expense saved locally");
-  };
-
-  const handleSync = () => {
-    if (expenses.length === 0) {
-      toast.error("No expenses to sync");
-      return;
-    }
-    toast.success(`${expenses.length} expenses synced successfully`);
-    navigate("/travel-settlement");
+    dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
+    setCurrentExpense({ type: "", amount: 0, date: "", remarks: "", image: null, travelRequestNumber: "" });
+    toast.success("Expense saved successfully!");
   };
 
   const handleDelete = (id: string) => {
-    const updatedExpenses = expenses.filter(exp => exp.id !== id);
-    setExpenses(updatedExpenses);
-    localStorage.setItem("savedExpenses", JSON.stringify(updatedExpenses));
+    dispatch({ type: 'DELETE_EXPENSE', payload: id });
     toast.success("Expense deleted");
-  };
-
-  return (
+  };  return (
     <div className="min-h-screen bg-background pb-20">
       <header className="bg-card border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
@@ -183,6 +172,16 @@ const ExpenseCapture = () => {
               <Save className="h-4 w-4 mr-2" />
               Save Expense
             </Button>
+            
+            {expenses.length > 0 && (
+              <Button 
+                onClick={() => navigate("/travel-settlement")} 
+                variant="outline" 
+                className="w-full"
+              >
+                Go to Travel Settlement
+              </Button>
+            )}
           </div>
         </Card>
 
@@ -215,17 +214,6 @@ const ExpenseCapture = () => {
           </Card>
         )}
       </div>
-
-      {expenses.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t p-4 shadow-lg">
-          <div className="container mx-auto max-w-2xl">
-            <Button onClick={handleSync} className="w-full bg-success hover:bg-success/90">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Sync {expenses.length} Expense{expenses.length > 1 ? "s" : ""}
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

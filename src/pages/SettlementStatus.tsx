@@ -1,3 +1,4 @@
+import { useTravelSettlement } from "@/context/TravelSettlementContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,17 +7,19 @@ import { CheckCircle2, Clock, FileText, ArrowLeft } from "lucide-react";
 
 const SettlementStatus = () => {
   const navigate = useNavigate();
+  const { state } = useTravelSettlement();
+  const settlement = state.settlements[state.settlements.length - 1];
 
-  // Mock settlement data
-  const settlement = {
-    requestNumber: "TR-2025-001",
-    status: "Under Review",
-    totalClaimed: 15000,
-    totalApproved: 14500,
-    totalPaid: 0,
-    financeReviewer: "Anil Kapoor",
-    reviewDate: "2025-01-25",
-  };
+  if (!settlement) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">No settlements found.</h1>
+          <Button onClick={() => navigate("/travel-settlement")}>Create a new settlement</Button>
+        </div>
+      </div>
+    );
+  }
 
   const timeline = [
     { status: "Draft", date: "2025-01-20", completed: true },
@@ -89,6 +92,36 @@ const SettlementStatus = () => {
             </div>
           </div>
         </Card>
+
+        {settlement.expenses && settlement.expenses.length > 0 && (
+          <Card className="p-6 mb-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Submitted Expenses</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Date</th>
+                    <th className="text-left p-2">Type</th>
+                    <th className="text-left p-2">Amount</th>
+                    <th className="text-left p-2">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {settlement.expenses.map((expense) => (
+                    <tr key={expense.id} className="border-b">
+                      <td className="p-2">{expense.date}</td>
+                      <td className="p-2">
+                        <span className="capitalize">{expense.type}</span>
+                      </td>
+                      <td className="p-2 font-semibold">₹{expense.amount.toFixed(2)}</td>
+                      <td className="p-2 text-muted-foreground">{expense.remarks || "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        )}
 
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-6">Timeline</h3>

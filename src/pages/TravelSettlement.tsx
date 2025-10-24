@@ -1,8 +1,11 @@
+import { useTravelSettlement } from "@/context/TravelSettlementContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Save, Send, Trash2, Upload, ArrowLeft } from "lucide-react";
 import { EmployeeDetails } from "@/components/EmployeeDetails";
@@ -16,6 +19,7 @@ import { MealsTab } from "@/components/expense-tabs/MealsTab";
 import { OthersTab } from "@/components/expense-tabs/OthersTab";
 import { LoadExpensesDialog } from "@/components/LoadExpensesDialog";
 
+
 interface ExpenseItem {
   id: string;
   type: string;
@@ -23,13 +27,16 @@ interface ExpenseItem {
   date: string;
   remarks: string;
   image: string | null;
+  travelRequestNumber: string;
 }
 
 const TravelSettlement = () => {
   const navigate = useNavigate();
+  const { state, dispatch } = useTravelSettlement();
   const [activeTab, setActiveTab] = useState("flat-allowance");
   const [showLoadDialog, setShowLoadDialog] = useState(false);
-  const [savedExpenses, setSavedExpenses] = useState<ExpenseItem[]>([]);
+  const [currentTravelRequest, setCurrentTravelRequest] = useState("TR-2025-001");
+  const [selectedExpenses, setSelectedExpenses] = useState<ExpenseItem[]>([]);
 
   // Mock employee data
   const employeeData = {
@@ -46,42 +53,57 @@ const TravelSettlement = () => {
   };
 
   const handleSubmit = () => {
-    navigate("/settlement-success");
+    if (selectedExpenses.length === 0) {
+      toast.error("Please add some expenses before submitting");
+      return;
+    }
+    
+    const newSettlement = {
+      requestNumber: currentTravelRequest,
+      status: "Under Review",
+      totalClaimed: selectedExpenses.reduce((acc, exp) => acc + exp.amount, 0),
+      totalApproved: 0,
+      totalPaid: 0,
+      financeReviewer: "Pending Assignment",
+      reviewDate: new Date().toISOString().split("T")[0],
+      expenses: selectedExpenses,
+    };
+    dispatch({ type: "ADD_SETTLEMENT", payload: newSettlement });
+    setSelectedExpenses([]);
+    navigate("/settlement-status");
   };
 
   const handleDelete = () => {
-    toast.error("Settlement deleted");
+    setSelectedExpenses([]);
+    toast.success("Settlement cleared");
   };
 
   const handleLoadExpenses = () => {
-    const savedExpensesStr = localStorage.getItem("savedExpenses");
-    if (!savedExpensesStr) {
-      toast.error("No saved expenses found");
+    if (state.expenses.length === 0) {
+      toast.error("No saved expenses found. Please create some expenses first.");
       return;
     }
-    
-    const expenses = JSON.parse(savedExpensesStr) as ExpenseItem[];
-    if (expenses.length === 0) {
-      toast.error("No saved expenses found");
-      return;
-    }
-    
-    setSavedExpenses(expenses);
     setShowLoadDialog(true);
   };
 
-  const handleImportExpenses = () => {
-    toast.success(`Imported ${savedExpenses.length} expense${savedExpenses.length > 1 ? 's' : ''} successfully`);
-    setShowLoadDialog(false);
+  const handleImportExpenses = (importedExpenses: ExpenseItem[]) => {
+    // Avoid duplicates
+    const newExpenses = importedExpenses.filter(
+      newExp => !selectedExpenses.some(existing => existing.id === newExp.id)
+    );
     
-    // Switch to the first relevant tab
-    if (savedExpenses.length > 0) {
-      const firstExpenseType = savedExpenses[0].type;
-      setActiveTab(firstExpenseType);
+    setSelectedExpenses([...selectedExpenses, ...newExpenses]);
+    toast.success(`Loaded ${newExpenses.length} expense${newExpenses.length > 1 ? 's' : ''} into respective tabs`);
+    
+    // Stay on current tab or switch to flat-allowance
+    if (activeTab === "expenses") {
+      setActiveTab("flat-allowance");
     }
-    
-    // Clear the saved expenses from localStorage after import
-    localStorage.removeItem("savedExpenses");
+  };
+
+  const handleRemoveExpense = (expenseId: string) => {
+    setSelectedExpenses(selectedExpenses.filter(exp => exp.id !== expenseId));
+    toast.success("Expense removed from settlement");
   };
 
   return (
@@ -101,7 +123,8 @@ const TravelSettlement = () => {
       <LoadExpensesDialog
         open={showLoadDialog}
         onOpenChange={setShowLoadDialog}
-        expenses={savedExpenses}
+        expenses={state.expenses}
+        travelRequestNumber={currentTravelRequest}
         onImport={handleImportExpenses}
       />
 
@@ -112,16 +135,35 @@ const TravelSettlement = () => {
             <TravelRequestSection />
 
             <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-foreground">Expense Details</h2>
-                <Button variant="outline" onClick={handleLoadExpenses}>
-                  <Upload className="h-4 w-4 mr-2" />
-                  Load Saved Expenses
-                </Button>
+              <div className="mb-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">Expense Details</h2>
+                  <Button variant="outline" onClick={handleLoadExpenses}>
+                    <Upload className="h-4 w-4 mr-2" />
+                    Load Saved Expenses
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  {/* <div className="flex-1">
+                    <Label htmlFor="travel-request">Travel Request Number</Label>
+                    <Input
+                      id="travel-request"
+                      value={currentTravelRequest}
+                      onChange={(e) => setCurrentTravelRequest(e.target.value)}
+                      placeholder="e.g., TR-2025-001"
+                    />
+                  </div> */}
+                  {selectedExpenses.length > 0 && (
+                    <div className="text-sm text-muted-foreground">
+                      {selectedExpenses.length} expense{selectedExpenses.length > 1 ? 's' : ''} selected
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 mb-6">
+                <TabsList className="grid w-full grid-cols-6 mb-6">
                   <TabsTrigger value="flat-allowance">Flat Allowance</TabsTrigger>
                   <TabsTrigger value="travel">Travel</TabsTrigger>
                   <TabsTrigger value="lodging">Lodging</TabsTrigger>
@@ -129,24 +171,44 @@ const TravelSettlement = () => {
                   <TabsTrigger value="meals">Meals</TabsTrigger>
                   <TabsTrigger value="others">Others</TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="flat-allowance">
-                  <FlatAllowanceTab />
+                  <FlatAllowanceTab 
+                    importedExpenses={selectedExpenses.filter(exp => exp.type.toLowerCase().includes('allowance'))} 
+                  />
                 </TabsContent>
                 <TabsContent value="travel">
-                  <TravelTab />
+                  <TravelTab 
+                    importedExpenses={selectedExpenses.filter(exp => exp.type.toLowerCase().includes('travel'))} 
+                  />
                 </TabsContent>
                 <TabsContent value="lodging">
-                  <LodgingTab />
+                  <LodgingTab 
+                    importedExpenses={selectedExpenses.filter(exp => exp.type.toLowerCase().includes('lodging') || exp.type.toLowerCase().includes('hotel'))} 
+                  />
                 </TabsContent>
                 <TabsContent value="conveyance">
-                  <ConveyanceTab />
+                  <ConveyanceTab 
+                    importedExpenses={selectedExpenses.filter(exp => exp.type.toLowerCase().includes('conveyance') || exp.type.toLowerCase().includes('transport'))} 
+                  />
                 </TabsContent>
                 <TabsContent value="meals">
-                  <MealsTab />
+                  <MealsTab 
+                    importedExpenses={selectedExpenses.filter(exp => exp.type.toLowerCase().includes('meal') || exp.type.toLowerCase().includes('food'))} 
+                  />
                 </TabsContent>
                 <TabsContent value="others">
-                  <OthersTab />
+                  <OthersTab 
+                    importedExpenses={selectedExpenses.filter(exp => 
+                      !exp.type.toLowerCase().includes('allowance') &&
+                      !exp.type.toLowerCase().includes('travel') &&
+                      !exp.type.toLowerCase().includes('lodging') &&
+                      !exp.type.toLowerCase().includes('hotel') &&
+                      !exp.type.toLowerCase().includes('conveyance') &&
+                      !exp.type.toLowerCase().includes('transport') &&
+                      !exp.type.toLowerCase().includes('meal') &&
+                      !exp.type.toLowerCase().includes('food')
+                    )} 
+                  />
                 </TabsContent>
               </Tabs>
             </Card>
@@ -154,7 +216,7 @@ const TravelSettlement = () => {
 
           <div className="lg:col-span-1">
             <ExpenseSummary
-              totalClaimed={15000}
+              totalClaimed={selectedExpenses.reduce((acc, exp) => acc + exp.amount, 0)}
               advanceTaken={10000}
             />
           </div>

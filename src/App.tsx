@@ -9,6 +9,7 @@ import ExpenseCapture from "./pages/ExpenseCapture";
 import SettlementSuccess from "./pages/SettlementSuccess";
 import SettlementStatus from "./pages/SettlementStatus";
 import NotFound from "./pages/NotFound";
+import { TravelSettlementProvider } from "./context/TravelSettlementContext";
 
 const queryClient = new QueryClient();
 
@@ -18,15 +19,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/travel-settlement" element={<TravelSettlement />} />
-          <Route path="/expense-capture" element={<ExpenseCapture />} />
-          <Route path="/settlement-success" element={<SettlementSuccess />} />
-          <Route path="/settlement-status" element={<SettlementStatus />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <TravelSettlementProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/travel-settlement" element={<TravelSettlement />} />
+            <Route path="/expense-capture" element={<ExpenseCapture />} />
+            <Route path="/settlement-success" element={<SettlementSuccess />} />
+            <Route path="/settlement-status" element={<SettlementStatus />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TravelSettlementProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

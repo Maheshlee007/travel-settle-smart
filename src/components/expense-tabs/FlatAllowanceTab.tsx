@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FlatAllowanceRow {
   id: string;
@@ -14,10 +14,46 @@ interface FlatAllowanceRow {
   remarks: string;
 }
 
-export const FlatAllowanceTab = () => {
+interface ExpenseItem {
+  id: string;
+  type: string;
+  amount: number;
+  date: string;
+  remarks: string;
+  image: string | null;
+  travelRequestNumber: string;
+}
+
+interface FlatAllowanceTabProps {
+  importedExpenses?: ExpenseItem[];
+}
+
+export const FlatAllowanceTab = ({ importedExpenses = [] }: FlatAllowanceTabProps) => {
   const [rows, setRows] = useState<FlatAllowanceRow[]>([
     { id: "1", date: "", description: "", days: 0, rate: 0, amount: 0, remarks: "" },
   ]);
+
+  // Populate rows when imported expenses are available
+  useEffect(() => {
+    if (importedExpenses.length > 0) {
+      const importedRows = importedExpenses.map(exp => ({
+        id: exp.id,
+        date: exp.date,
+        description: exp.type,
+        days: 1, // Default to 1 day, user can modify
+        rate: exp.amount,
+        amount: exp.amount,
+        remarks: exp.remarks
+      }));
+      
+      // Keep existing rows and add imported ones
+      setRows(prevRows => {
+        const existingIds = prevRows.map(row => row.id);
+        const newImported = importedRows.filter(row => !existingIds.includes(row.id));
+        return [...prevRows.filter(row => row.date || row.description), ...newImported];
+      });
+    }
+  }, [importedExpenses]);
 
   const addRow = () => {
     setRows([...rows, { id: Date.now().toString(), date: "", description: "", days: 0, rate: 0, amount: 0, remarks: "" }]);
