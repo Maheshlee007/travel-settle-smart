@@ -71,14 +71,42 @@ const initialState: TravelSettlementState = {
   ],
   settlements: [
     {
-      requestNumber: 'TR-2025-001',
+      requestNumber: 'TR-2025-002',
       status: 'Under Review',
-      totalClaimed: 5500,
+      totalClaimed: 3800,
       totalApproved: 0,
       totalPaid: 0,
-      financeReviewer: 'Anil Kapoor',
-      reviewDate: '2025-01-25',
-      expenses: []
+      financeReviewer: 'Priya Sharma',
+      reviewDate: '2025-01-26',
+      expenses: [
+        {
+          id: '9',
+          type: 'meals',
+          amount: 800,
+          date: '2025-01-21',
+          remarks: 'Dinner with client',
+          image: null,
+          travelRequestNumber: 'TR-2025-002'
+        },
+        {
+          id: '10',
+          type: 'meals',
+          amount: 1200,
+          date: '2025-01-22',
+          remarks: 'Team lunch meeting',
+          image: 'lunch_receipt.jpg',
+          travelRequestNumber: 'TR-2025-002'
+        },
+        {
+          id: '11',
+          type: 'meals',
+          amount: 1800,
+          date: '2025-01-23',
+          remarks: 'Conference dinner',
+          image: 'dinner_receipt.jpg',
+          travelRequestNumber: 'TR-2025-002'
+        }
+      ]
     }
   ],
   draftSettlements: [

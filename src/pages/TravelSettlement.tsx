@@ -253,12 +253,13 @@ const TravelSettlement = () => {
               Delete
             </Button>
             <Button 
-              variant="secondary" 
+              variant="outline" 
               onClick={handleSave}
               disabled={!currentTravelRequest.trim()}
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Draft
+              Save to Draft
             </Button>
             <Button 
               onClick={handleSubmit} 

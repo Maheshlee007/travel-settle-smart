@@ -30,26 +30,28 @@ export const TravelRequestSection = ({ onTravelRequestChange }: TravelRequestSec
     { id: "TR-2025-003", label: "TR-2025-003 - Conference Bangalore" },
   ];
 
-  const handleFetch = () => {
-    if (!selectedRequest) {
-      toast.error("Please select a travel request number");
-      return;
+  const handleRequestSelection = (requestNumber: string) => {
+    setSelectedRequest(requestNumber);
+    
+    if (requestNumber) {
+      // Mock fetch - in real app, this would call an API
+      setTravelData({
+        travelType: "Domestic",
+        purpose: "Business Meeting",
+        requestedDate: "2025-01-15",
+        fromDate: "2025-01-20",
+        toDate: "2025-01-22",
+        fromPlace: "Bangalore",
+        toPlace: "Mumbai",
+      });
+
+      // Notify parent component about the selected travel request
+      onTravelRequestChange(requestNumber);
+      toast.success("Travel request details fetched successfully");
+    } else {
+      setTravelData(null);
+      onTravelRequestChange("");
     }
-
-    // Mock fetch - in real app, this would call an API
-    setTravelData({
-      travelType: "Domestic",
-      purpose: "Business Meeting",
-      requestedDate: "2025-01-15",
-      fromDate: "2025-01-20",
-      toDate: "2025-01-22",
-      fromPlace: "Bangalore",
-      toPlace: "Mumbai",
-    });
-
-    // Notify parent component about the selected travel request
-    onTravelRequestChange(selectedRequest);
-    toast.success("Travel request details fetched successfully");
   };
 
   return (
@@ -60,7 +62,7 @@ export const TravelRequestSection = ({ onTravelRequestChange }: TravelRequestSec
             <label className="text-sm font-medium text-foreground mb-2 block">
               Travel Request Number *
             </label>
-            <Select value={selectedRequest} onValueChange={setSelectedRequest}>
+            <Select value={selectedRequest} onValueChange={handleRequestSelection}>
               <SelectTrigger>
                 <SelectValue placeholder="Select travel request" />
               </SelectTrigger>
@@ -73,10 +75,6 @@ export const TravelRequestSection = ({ onTravelRequestChange }: TravelRequestSec
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleFetch} className="bg-primary hover:bg-primary/90">
-            <Download className="h-4 w-4 mr-2" />
-            Fetch Details
-          </Button>
         </div>
 
         {travelData && (
