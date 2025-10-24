@@ -44,7 +44,7 @@ const initialState: TravelSettlementState = {
     {
       id: '1',
       type: 'travel',
-      amount: 2500,
+      amount: 4500,
       date: '2025-01-20',
       remarks: 'Flight to Mumbai',
       image: 'receipt1.jpg',
@@ -53,7 +53,7 @@ const initialState: TravelSettlementState = {
     {
       id: '2',
       type: 'lodging',
-      amount: 3000,
+      amount: 4000,
       date: '2025-01-21',
       remarks: 'Hotel stay',
       image: 'receipt2.jpg',
@@ -62,7 +62,7 @@ const initialState: TravelSettlementState = {
     {
       id: '3',
       type: 'meals',
-      amount: 800,
+      amount: 1200,
       date: '2025-01-21',
       remarks: 'Dinner with client',
       image: null,
@@ -73,7 +73,7 @@ const initialState: TravelSettlementState = {
     {
       requestNumber: 'TR-2025-002',
       status: 'Under Review',
-      totalClaimed: 3800,
+      totalClaimed: 6200,
       totalApproved: 0,
       totalPaid: 0,
       financeReviewer: 'Priya Sharma',
@@ -82,7 +82,7 @@ const initialState: TravelSettlementState = {
         {
           id: '9',
           type: 'meals',
-          amount: 800,
+          amount: 1200,
           date: '2025-01-21',
           remarks: 'Dinner with client',
           image: null,
@@ -91,7 +91,7 @@ const initialState: TravelSettlementState = {
         {
           id: '10',
           type: 'meals',
-          amount: 1200,
+          amount: 1500,
           date: '2025-01-22',
           remarks: 'Team lunch meeting',
           image: 'lunch_receipt.jpg',
@@ -99,11 +99,11 @@ const initialState: TravelSettlementState = {
         },
         {
           id: '11',
-          type: 'meals',
-          amount: 1800,
+          type: 'conveyance',
+          amount: 3500,
           date: '2025-01-23',
-          remarks: 'Conference dinner',
-          image: 'dinner_receipt.jpg',
+          remarks: 'Local transport and taxi',
+          image: 'transport_receipt.jpg',
           travelRequestNumber: 'TR-2025-002'
         }
       ]
@@ -113,7 +113,7 @@ const initialState: TravelSettlementState = {
     {
       requestNumber: 'TR-2025-003',
       status: 'Draft',
-      totalClaimed: 2200,
+      totalClaimed: 4800,
       totalApproved: 0,
       totalPaid: 0,
       financeReviewer: 'Not Assigned',
@@ -122,7 +122,7 @@ const initialState: TravelSettlementState = {
         {
           id: '4',
           type: 'travel',
-          amount: 1500,
+          amount: 2800,
           date: '2025-01-23',
           remarks: 'Train ticket to Chennai',
           image: null,
@@ -130,10 +130,10 @@ const initialState: TravelSettlementState = {
         },
         {
           id: '5',
-          type: 'travel',
-          amount: 700,
+          type: 'lodging',
+          amount: 2000,
           date: '2025-01-23',
-          remarks: 'Bus fare local transport',
+          remarks: 'Hotel accommodation Chennai',
           image: null,
           travelRequestNumber: 'TR-2025-003'
         }

@@ -18,16 +18,16 @@ const SettlementStatus = () => {
     {
       requestNumber: 'TR-2025-001',
       status: 'Approved',
-      totalClaimed: 5500,
-      totalApproved: 5200,
-      totalPaid: 5200,
+      totalClaimed: 8500,
+      totalApproved: 8200,
+      totalPaid: 8200,
       financeReviewer: 'Anil Kapoor',
       reviewDate: '2025-01-25',
       expenses: [
         {
           id: '1',
           type: 'travel',
-          amount: 2500,
+          amount: 4500,
           date: '2025-01-20',
           remarks: 'Flight to Mumbai',
           image: 'receipt1.jpg',
@@ -36,7 +36,7 @@ const SettlementStatus = () => {
         {
           id: '2',
           type: 'lodging',
-          amount: 3000,
+          amount: 4000,
           date: '2025-01-21',
           remarks: 'Hotel stay',
           image: 'receipt2.jpg',
@@ -57,11 +57,14 @@ const SettlementStatus = () => {
     );
   }
 
+  // Fixed allocated amount for the company
+  const allocatedAmount = 25000;
+  
   // Calculate totals across all settlements
   const totalClaimed = allSettlements.reduce((sum, s) => sum + s.totalClaimed, 0);
   const totalApproved = allSettlements.reduce((sum, s) => sum + s.totalApproved, 0);
   const totalPaid = allSettlements.reduce((sum, s) => sum + s.totalPaid, 0);
-  const totalRemaining = totalClaimed - totalApproved;
+  const totalRemaining = allocatedAmount - totalClaimed;
 
   // Initialize selectedSettlement on first render
   useEffect(() => {
@@ -156,9 +159,10 @@ const SettlementStatus = () => {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Wallet className="h-5 w-5 text-orange-600" />
-                  <p className="text-sm font-semibold text-orange-600">Remaining</p>
+                  <p className="text-sm font-semibold text-orange-600">Remaining Budget</p>
                 </div>
                 <p className="text-3xl font-bold text-orange-800">₹{totalRemaining.toFixed(2)}</p>
+                <p className="text-xs text-orange-600 mt-1">from ₹{allocatedAmount.toFixed(2)} allocated</p>
               </div>
             </div>
           </div>

@@ -241,7 +241,6 @@ const TravelSettlement = () => {
           <div className="lg:col-span-1">
             <ExpenseSummary
               totalClaimed={selectedExpenses.reduce((acc, exp) => acc + exp.amount, 0)}
-              advanceTaken={10000}
             />
           </div>
         </div>

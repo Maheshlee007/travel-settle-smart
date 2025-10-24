@@ -3,14 +3,14 @@ import { Separator } from "@/components/ui/separator";
 
 interface ExpenseSummaryProps {
   totalClaimed: number;
-  advanceTaken: number;
+  advanceTaken?: number;
   totalApproved?: number;
   showApproved?: boolean;
 }
 
 export const ExpenseSummary = ({
   totalClaimed,
-  advanceTaken,
+  advanceTaken = 25000, // Fixed allocated amount
   totalApproved,
   showApproved = false,
 }: ExpenseSummaryProps) => {
@@ -29,7 +29,7 @@ export const ExpenseSummary = ({
           <span className="font-semibold text-foreground">₹{totalClaimed.toFixed(2)}</span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm text-muted-foreground">Advance Taken</span>
+          <span className="text-sm text-muted-foreground">Allocated Amount</span>
           <span className="font-semibold text-foreground">₹{advanceTaken.toFixed(2)}</span>
         </div>
         {showApproved && (
