@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Save, Send, Trash2, Upload } from "lucide-react";
+import { Save, Send, Trash2, Upload, ArrowLeft } from "lucide-react";
 import { EmployeeDetails } from "@/components/EmployeeDetails";
 import { TravelRequestSection } from "@/components/TravelRequestSection";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
@@ -14,10 +14,22 @@ import { LodgingTab } from "@/components/expense-tabs/LodgingTab";
 import { ConveyanceTab } from "@/components/expense-tabs/ConveyanceTab";
 import { MealsTab } from "@/components/expense-tabs/MealsTab";
 import { OthersTab } from "@/components/expense-tabs/OthersTab";
+import { LoadExpensesDialog } from "@/components/LoadExpensesDialog";
+
+interface ExpenseItem {
+  id: string;
+  type: string;
+  amount: number;
+  date: string;
+  remarks: string;
+  image: string | null;
+}
 
 const TravelSettlement = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("flat-allowance");
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
+  const [savedExpenses, setSavedExpenses] = useState<ExpenseItem[]>([]);
 
   // Mock employee data
   const employeeData = {
@@ -48,15 +60,27 @@ const TravelSettlement = () => {
       return;
     }
     
-    const savedExpenses = JSON.parse(savedExpensesStr);
-    if (savedExpenses.length === 0) {
+    const expenses = JSON.parse(savedExpensesStr) as ExpenseItem[];
+    if (expenses.length === 0) {
       toast.error("No saved expenses found");
       return;
     }
     
-    toast.success(`Loaded ${savedExpenses.length} expense${savedExpenses.length > 1 ? 's' : ''} successfully`);
+    setSavedExpenses(expenses);
+    setShowLoadDialog(true);
+  };
+
+  const handleImportExpenses = () => {
+    toast.success(`Imported ${savedExpenses.length} expense${savedExpenses.length > 1 ? 's' : ''} successfully`);
+    setShowLoadDialog(false);
     
-    // Clear the saved expenses after loading
+    // Switch to the first relevant tab
+    if (savedExpenses.length > 0) {
+      const firstExpenseType = savedExpenses[0].type;
+      setActiveTab(firstExpenseType);
+    }
+    
+    // Clear the saved expenses from localStorage after import
     localStorage.removeItem("savedExpenses");
   };
 
@@ -64,10 +88,22 @@ const TravelSettlement = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Travel Settlement</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">Travel Settlement</h1>
+          </div>
           <p className="text-sm text-muted-foreground">Home → Travel → Travel Settlement</p>
         </div>
       </header>
+
+      <LoadExpensesDialog
+        open={showLoadDialog}
+        onOpenChange={setShowLoadDialog}
+        expenses={savedExpenses}
+        onImport={handleImportExpenses}
+      />
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

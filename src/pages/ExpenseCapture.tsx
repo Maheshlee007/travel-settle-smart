@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Upload, Save, RefreshCw, X } from "lucide-react";
+import { Camera, Upload, Save, RefreshCw, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 interface ExpenseItem {
@@ -82,7 +82,12 @@ const ExpenseCapture = () => {
     <div className="min-h-screen bg-background pb-20">
       <header className="bg-card border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Add Travel Expense</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">Add Travel Expense</h1>
+          </div>
           <p className="text-sm text-muted-foreground">Travel → Expense Capture</p>
         </div>
       </header>

@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Clock, FileText, DollarSign } from "lucide-react";
+import { CheckCircle2, Clock, FileText, ArrowLeft } from "lucide-react";
 
 const SettlementStatus = () => {
   const navigate = useNavigate();
@@ -30,7 +30,12 @@ const SettlementStatus = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-card border-b sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-foreground">Settlement Status</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">Settlement Status</h1>
+          </div>
           <p className="text-sm text-muted-foreground">Travel → Settlement Status</p>
         </div>
       </header>
